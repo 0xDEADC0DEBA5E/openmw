@@ -11,6 +11,8 @@ ccache/
 
 ## build process
 /deps
+/out/vcpkg/installed/
+/out/install/
 /MSVC*
 
 ## doxygen
@@ -70,10 +72,10 @@ apps/wizard/ui_intropage.h
 apps/wizard/ui_languageselectionpage.h
 apps/wizard/ui_methodselectionpage.h
 components/ui_contentselector.h
-docs/mainpage.hpp
-docs/Doxyfile
-docs/DoxyfilePages
-docs/source/reference/lua-scripting/generated_html
+doc/mainpage.hpp
+doc/Doxyfile
+doc/DoxyfilePages
+doc/source/reference/lua-scripting/generated_html
 moc_*.cxx
 *.cxx_parameters
 *qrc_launcher.cxx

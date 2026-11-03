@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": { "major": 3, "minor": 20, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "windows-gcc16",
+      "hidden": true,
+      "generator": "Ninja",
+      "environment": {
+        "GCC16_BIN": "C:/msys64/mingw64/bin",
+        "PATH": "$env{GCC16_BIN};$penv{PATH}"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "$env{GCC16_BIN}/gcc.exe",
+        "CMAKE_CXX_COMPILER": "$env{GCC16_BIN}/g++.exe",
+        "CMAKE_RC_COMPILER": "$env{GCC16_BIN}/windres.exe",
+        "CMAKE_MAKE_PROGRAM": "$env{GCC16_BIN}/ninja.exe",
+        "OPENMW_USE_VCPKG": "ON",
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic",
+        "VCPKG_HOST_TRIPLET": "x64-mingw-dynamic",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "windows-gcc16-debug",
+      "displayName": "Windows GCC 16 Debug",
+      "inherits": "windows-gcc16",
+      "binaryDir": "${sourceDir}/out/build/windows/gcc16-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "windows-gcc16-release",
+      "displayName": "Windows GCC 16 Release",
+      "inherits": "windows-gcc16",
+      "binaryDir": "${sourceDir}/out/build/windows/gcc16-release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "windows-gcc16-debug", "configurePreset": "windows-gcc16-debug" },
+    { "name": "windows-gcc16-release", "configurePreset": "windows-gcc16-release" }
+  ]
+}

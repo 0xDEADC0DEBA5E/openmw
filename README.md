@@ -46,6 +46,58 @@ Getting Started
 * [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
 * [Known issues](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=Bug)
 
+Building this layout on Windows
+-------------------------------
+
+The root CMake project configures the engine in `src/engine`, the game in
+`src/tes3`, and the launcher in `src/launcher`. The game and launcher currently
+build their existing implementations from `apps`. Engine headers retain their
+`components/...` include names through generated forwarding headers in the build
+directory. C++20 is the default; a newer standard can be selected with
+`CMAKE_CXX_STANDARD` when supported by the compiler.
+
+Install MSYS2's MinGW-w64 GCC 16 toolchain, CMake 3.21 or newer, Ninja, and Git.
+The presets use `C:/msys64/mingw64/bin`; its `gcc.exe` and `g++.exe` must report
+version 16. Both the target and host vcpkg triplets are `x64-mingw-dynamic`.
+Clone and bootstrap vcpkg into `deps/vcpkg`, or set
+`VCPKG_ROOT` to an existing vcpkg checkout:
+
+```powershell
+git clone https://github.com/microsoft/vcpkg.git deps/vcpkg
+.\deps\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+```
+
+`dependencies.json` is the dependency manifest, pinned to the vcpkg baseline
+used by OpenMW's dependency build. CMake generates vcpkg's required `vcpkg.json`
+filename in the build directory and restores dependencies before configuring
+the project. This includes Qt, SQLite, yaml-cpp, double-precision Bullet, and
+the OpenMW OpenSceneGraph and Recast forks. Overlay ports are in
+`out/vcpkg/ports`; installed packages are shared in `out/vcpkg/installed`.
+No separate Qt SDK is required. Enable existing test or benchmark targets with
+their `BUILD_*` options to restore the corresponding optional packages as well.
+
+From PowerShell at the project root, build and launch with:
+
+```powershell
+.\out\build.cmd -Run
+```
+
+Use `-Configuration Release` for a release build or `-Install` to install under
+`out/install/3377440`. The script verifies GCC 16 and builds all enabled
+applications. The equivalent CMake commands are:
+
+```powershell
+cmake --preset windows-gcc16-debug
+cmake --build --preset windows-gcc16-debug --parallel 8
+cmake --build out/build/windows/gcc16-debug --target run
+```
+
+In CLion, select the `windows-gcc16-debug` preset with the MinGW toolchain.
+The executables, configuration files, resources, and required DLLs are placed
+together in `out/build/windows/gcc16-debug`. The runnable targets remain `openmw`
+and `openmw-launcher`. Configure the launcher with your Morrowind game files
+before playing.
+
 Contributing
 ---------
 

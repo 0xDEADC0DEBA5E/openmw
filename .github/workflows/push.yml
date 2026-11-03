@@ -18,7 +18,7 @@ jobs:
       run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
 
     - name: Install Building Dependencies
-      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+      run: sudo out/ci/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
     - name: Prime ccache
       uses: hendrikmuhs/ccache-action@v1

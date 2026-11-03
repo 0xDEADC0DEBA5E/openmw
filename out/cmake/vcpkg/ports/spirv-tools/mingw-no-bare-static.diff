@@ -1,0 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -224,10 +224,15 @@
+ 
+   # For MinGW cross compile, statically link to the C++ runtime.
+   # But it still depends on MSVCRT.dll.
+   if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+     if (NOT MSVC)
++      # LINK_FLAGS is a single string property, so the unquoted form below made
++      # set_target_properties treat "-static-libgcc" as the next property name and
++      # only the bare "-static" reached the linker. "-static" forces the static
++      # libwinpthread, which some mingw-w64 bundles build against UCRT while the
++      # driver links msvcrt: __intrinsic_setjmpex / __ms_vsnprintf go unresolved.
+       set_target_properties(${TARGET} PROPERTIES
+-        LINK_FLAGS -static -static-libgcc -static-libstdc++)
++        LINK_FLAGS "-static-libgcc -static-libstdc++")
+     endif()
+   endif()
+ endfunction()

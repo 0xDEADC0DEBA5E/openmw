@@ -1,0 +1,6 @@
+{
+    "dependencies": @VCPKG_DEPENDENCIES@,
+    "version": "@RPG_VERSION@",
+    "name": "@RPG@",
+    "builtin-baseline": "@VCPKG_VERSION@"
+}

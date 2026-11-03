@@ -1,0 +1,90 @@
+[
+  "boost-geometry",
+  "boost-iostreams",
+  "boost-program-options",
+  {
+    "name": "bullet3",
+    "features": [
+      "double-precision",
+      "multithreading"
+    ]
+  },
+  {
+    "name": "ffmpeg",
+    "default-features": false,
+    "features": [
+      "avcodec",
+      "avformat",
+      "swresample",
+      "swscale"
+    ]
+  },
+  "freetype",
+  "icu",
+  "luajit",
+  "lz4",
+  {
+    "name": "mygui",
+    "platform": "!osx"
+  },
+  "openal-soft",
+  "osg",
+  {
+    "name": "openmw-mygui-osx",
+    "platform": "osx"
+  },
+  "recastnavigation",
+  {
+    "name": "sdl2",
+    "default-features": false,
+    "features": [
+      "dbus",
+      "wayland",
+      "x11"
+    ],
+    "platform": "linux"
+  },
+  {
+    "name": "sdl2",
+    "platform": "!linux"
+  },
+  "sqlite3",
+  {
+    "name": "unshield",
+    "platform": "osx | linux"
+  },
+  "yaml-cpp",
+  "zlib",
+  {
+    "name": "qtbase",
+    "default-features": false,
+    "features": [
+      "concurrent",
+      "gui",
+      "network",
+      "opengl",
+      "png",
+      "widgets"
+    ]
+  },
+  {
+    "name": "qtbase",
+    "default-features": false,
+    "features": [
+      "fontconfig",
+      "xcb",
+      "xcb-xlib",
+      "xrender"
+    ],
+    "platform": "linux"
+  },
+  "qtsvg",
+  {
+    "name": "qttools",
+    "default-features": false,
+    "features": [
+      "linguist"
+    ]
+  },
+  "qttranslations"
+]

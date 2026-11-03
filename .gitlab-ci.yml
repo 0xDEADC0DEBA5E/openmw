@@ -49,10 +49,10 @@ Ubuntu_GCC_preprocess:
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
-    - CI/install_debian_deps.sh openmw-deps openmw-deps-dynamic gcc_preprocess
+    - out/ci/install_debian_deps.sh openmw-deps openmw-deps-dynamic gcc_preprocess
     - pip3 install --user --break-system-packages click termtables
   script:
-    - CI/ubuntu_gcc_preprocess.sh
+    - out/ci/ubuntu_gcc_preprocess.sh
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "push" && $CI_PROJECT_ID != "7107382"
@@ -72,7 +72,7 @@ Ubuntu_GCC_preprocess:
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh -C
+    - out/ci/before_script.linux.sh -C
     - cd build
     - cmake --build . -- -j $(nproc)
     - df -h
@@ -112,7 +112,7 @@ Almalinux_Generic:
     - key:
         prefix: almalinux-generic-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/linux/deps_versions.sh
+          - out/ci/linux/deps_versions.sh
       paths:
         - deps
         - ccache
@@ -129,20 +129,20 @@ Almalinux_Generic:
     - dnf install -y epel-release
     - dnf install -y git binutils gcc-toolset-13 ccache cmake unzip pkg-config p7zip p7zip-plugins pipx mesa-libGL-devel libxkbcommon-devel mesa-libEGL-devel fontconfig
     - source /opt/rh/gcc-toolset-13/enable
-    - ./CI/linux/before_install_for_vcpkg.sh
+    - ./out/ci/linux/before_install_for_vcpkg.sh
   script:
     - df -h
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh -C
+    - out/ci/before_script.linux.sh -C
     - cd build
     - cmake --build . -- -j $(nproc)
     - ccache -svv
     - |
       if [[ -v AWS_ACCESS_KEY_ID ]]; then
           dnf install -y awscli2 jq
-          ../CI/store-symbols.sh
+          ../out/ci/store-symbols.sh
           aws --endpoint-url https://rgw.ctrl-c.liu.se s3 sync --size-only SymStore s3://openmw-sym
       fi
     - printf "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}\nCI_JOB_ID ${CI_JOB_ID}\nCI_COMMIT_SHA ${CI_COMMIT_SHA}\n" > CI-ID.txt
@@ -172,7 +172,7 @@ Almalinux_Generic:
           tar -xf "$package" -C install
       done
     - export OPENMW_DEBUGINFOD=ON
-    - CI/run_integration_tests.sh
+    - out/ci/run_integration_tests.sh
   after_script:
     - |
       if [[ -f /tmp/openmw-crash.log ]]; then
@@ -239,7 +239,7 @@ Coverity:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:
-    - CI/install_debian_deps.sh coverity openmw-deps openmw-deps-dynamic
+    - out/ci/install_debian_deps.sh coverity openmw-deps openmw-deps-dynamic
     - curl -o /tmp/cov-analysis-linux64.tgz https://scan.coverity.com/download/linux64
       --form project=$COVERITY_SCAN_PROJECT_NAME --form token=$COVERITY_SCAN_TOKEN
     - tar xfz /tmp/cov-analysis-linux64.tgz
@@ -249,7 +249,7 @@ Coverity:
     - export COVERITY_NO_LOG_ENVIRONMENT_VARIABLES=1
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh -C
+    - out/ci/before_script.linux.sh -C
     - cov-analysis-linux64-*/bin/cov-configure --template --comptype prefix --compiler ccache
     - cov-analysis-linux64-*/bin/cov-build --dir cov-int cmake --build build -- -j $(nproc)
     - ccache -svv
@@ -270,7 +270,7 @@ Coverity_Upload:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   before_script:
-    - CI/install_debian_deps.sh coverity_upload
+    - out/ci/install_debian_deps.sh coverity_upload
   script:
     - echo "$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/$OPENMW_JOB_ID/artifacts/cov-int.tar.gz"
     - curl https://scan.coverity.com/builds?project=$COVERITY_SCAN_PROJECT_NAME
@@ -286,7 +286,7 @@ Ubuntu_GCC:
   cache:
     key: Ubuntu_GCC.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+    - out/ci/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
     CC: gcc
     CXX: g++
@@ -317,11 +317,11 @@ Clang_Format:
   variables:
     CLANG_FORMAT: clang-format-14
   before_script:
-    - CI/install_debian_deps.sh openmw-clang-format
+    - out/ci/install_debian_deps.sh openmw-clang-format
   script:
-    - CI/check_cmake_format.sh
-    - CI/check_file_names.sh
-    - CI/check_clang_format.sh
+    - out/ci/check_cmake_format.sh
+    - out/ci/check_file_names.sh
+    - out/ci/check_clang_format.sh
 
 Lupdate:
   extends: .Ubuntu_Image
@@ -333,9 +333,9 @@ Lupdate:
   variables:
     LUPDATE: /usr/lib/qt6/bin/lupdate
   before_script:
-    - CI/install_debian_deps.sh openmw-qt-translations
+    - out/ci/install_debian_deps.sh openmw-qt-translations
   script:
-    - CI/check_qt_translations.sh
+    - out/ci/check_qt_translations.sh
 
 Teal:
   stage: checks
@@ -344,7 +344,7 @@ Teal:
     - apt-get update
     - apt-get -y install curl wget make build-essential libreadline-dev git-core zip unzip
   script:
-    - CI/teal_ci.sh
+    - out/ci/teal_ci.sh
   artifacts:
     when: always
     paths:
@@ -355,7 +355,7 @@ Ubuntu_GCC_Debug:
   cache:
     key: Ubuntu_GCC_Debug.ubuntu_24.04.v3.$CI_COMMIT_REF_PROTECTED
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+    - out/ci/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
     CC: gcc
     CXX: g++
@@ -467,7 +467,7 @@ Ubuntu_GCC_tests_coverage:
     BUILD_WITH_CODE_COVERAGE: 1
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
+    - out/ci/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic openmw-coverage
     - pipx install gcovr==8.3
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
@@ -489,8 +489,8 @@ Ubuntu_GCC_tests_coverage:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - "**/CMakeLists.txt"
-        - "cmake/**/*"
-        - "CI/**/*"
+        - "out/cmake/**/*"
+        - "out/ci/**/*"
         - ".gitlab-ci.yml"
   cache:
     key: Ubuntu_GCC_FetchContent_Static_Deps.ubuntu_24.04.v2.$CI_COMMIT_REF_PROTECTED
@@ -499,7 +499,7 @@ Ubuntu_GCC_tests_coverage:
       - ccache/
       - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-static
+    - out/ci/install_debian_deps.sh gcc openmw-deps openmw-deps-static
   variables:
     CI_OPENMW_USE_STATIC_DEPS: 1
     CC: gcc
@@ -510,7 +510,7 @@ Ubuntu_GCC_tests_coverage:
 Ubuntu_Clang:
   extends: .Ubuntu
   before_script:
-    - CI/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
+    - out/ci/install_debian_deps.sh clang openmw-deps openmw-deps-dynamic
   cache:
     key: Ubuntu_Clang.ubuntu_24.04.v3.$CI_COMMIT_REF_PROTECTED
   variables:
@@ -523,7 +523,7 @@ Ubuntu_Clang:
 .Ubuntu_Clang_Tidy_Base:
   extends: Ubuntu_Clang
   before_script:
-    - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
+    - out/ci/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
     # Download 1.2.0 tag of clang_tidy_cache.py
     - curl https://raw.githubusercontent.com/matus-chochlik/ctcache/e33c063ca6e52b48bcefbc45d46d8c150ffa81ca/src/ctcache/clang_tidy_cache.py -o /usr/local/bin/clang_tidy_cache.py
     - chmod 0775 /usr/local/bin/clang_tidy_cache.py
@@ -548,7 +548,7 @@ Ubuntu_Clang:
     - mkdir -pv "${CCACHE_DIR}"
     - mkdir -pv "${CTCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.linux.sh -C
+    - out/ci/before_script.linux.sh -C
     - mkdir -p build/extern build/apps/launcher build/apps/opencs build/apps/wizard
     - cp extern/.clang-tidy build/extern/
     - cp extern/.clang-tidy build/apps/launcher/
@@ -624,10 +624,10 @@ Ubuntu_Clang_tests_Debug:
       - .cache/pip
       - apt-cache/
   before_script:
-    - CI/install_debian_deps.sh $OPENMW_DEPS
+    - out/ci/install_debian_deps.sh $OPENMW_DEPS
     - pip3 install --user --break-system-packages numpy matplotlib termtables click
   script:
-    - CI/run_integration_tests.sh
+    - out/ci/run_integration_tests.sh
   after_script:
     - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
     - mkdir -p integration_tests_output
@@ -674,14 +674,14 @@ Ubuntu_GCC_integration_tests_asan:
   tags:
     - saas-macos-medium-m1
   script:
-    - CI/before_install.macos.sh
+    - out/ci/before_install.macos.sh
     - brew install ccache
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
     - mkdir -pv "${CCACHE_DIR}"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_script.macos.sh -C
-    - CI/macos/build.sh
+    - out/ci/before_script.macos.sh -C
+    - out/ci/macos/build.sh
     - cd build
     - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME##*/}.dmg"; done
     - brew install s3cmd
@@ -716,7 +716,7 @@ macOS26_Xcode26_amd64:
     key:
       prefix: macOS26_Xcode26_amd64.v1.$CI_COMMIT_REF_PROTECTED
       files:
-        - CI/macos/deps_versions.sh
+        - out/ci/macos/deps_versions.sh
     paths:
       - ccache/
   variables:
@@ -735,7 +735,7 @@ macOS26_Xcode26_arm64:
     key:
       prefix: macOS26_Xcode26_arm64.v1.$CI_COMMIT_REF_PROTECTED
       files:
-        - CI/macos/deps_versions.sh
+        - out/ci/macos/deps_versions.sh
     paths:
       - ccache/
   variables:
@@ -884,7 +884,7 @@ macOS26_Xcode26_arm64:
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64_Ninja\.cmake\api\v1\query\codemodel-v2
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -N -b -t -C $multiview -E
+    - sh out/ci/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -N -b -t -C $multiview -E
     - cd MSVC2022_64_Ninja
     - Get-Volume
     - .\ActivateMSVC.ps1
@@ -901,7 +901,7 @@ macOS26_Xcode26_arm64:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         Push-Location ..
-        ..\CI\Store-Symbols.ps1 -SkipCompress
+        ..\out\ci\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
         7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
@@ -930,7 +930,7 @@ macOS26_Xcode26_arm64:
     key:
       prefix: ninja-2022
       files:
-        - CI/deps_versions.msvc.sh
+        - out/ci/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64_Ninja/deps/Qt
@@ -976,14 +976,14 @@ Windows_Ninja_RelWithDebInfo_GroupOne:
     - key:
         prefix: ninja-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -998,14 +998,14 @@ Windows_Ninja_RelWithDebInfo_GroupTwo:
     - key:
         prefix: ninja-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1018,7 +1018,7 @@ TriggerNinja:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - apk add bash git jq
-    - CI/trigger_ninja_if_necessary.sh
+    - out/ci/trigger_ninja_if_necessary.sh
 
 DetectStatus:
   tags:
@@ -1035,7 +1035,7 @@ DetectStatus:
       artifacts: false
   script:
     - apk add bash git jq
-    - CI/detect_and_report_ninja_status.sh
+    - out/ci/detect_and_report_ninja_status.sh
 
 ReportStatus:
   tags:
@@ -1081,7 +1081,7 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - key:
         prefix: ninja-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64_Ninja/deps/Qt
@@ -1089,14 +1089,14 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
     - key:
         prefix: ninja-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
@@ -1151,7 +1151,7 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - $env:CCACHE_DIR = "$env:TEMP\ccache"
     - ccache -z -M "${CCACHE_SIZE}"
     - New-Item -Type File -Force -Path MSVC2022_64\.cmake\api\v1\query\codemodel-v2
-    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
+    - sh out/ci/before_script.msvc.sh -c $config -p Win64 -v 2022 -k -V -b -t -C $multiview -E
     - cd MSVC2022_64
     - Get-Volume
     - $env:CCACHE_IGNOREHEADERS = "$(Get-Location)\deps"
@@ -1166,7 +1166,7 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         Push-Location ..
-        ..\CI\Store-Symbols.ps1 -SkipCompress
+        ..\out\ci\Store-Symbols.ps1 -SkipCompress
         if(!$?) { Exit $LASTEXITCODE }
         7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2022_64_${group_name}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
         if(!$?) { Exit $LASTEXITCODE }
@@ -1196,7 +1196,7 @@ Windows_Ninja_CacheInit_RelWithDebInfo:
     key:
         prefix: msbuild-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
     paths:
     - deps
     - MSVC2022_64/deps/Qt
@@ -1238,14 +1238,14 @@ Windows_MSBuild_RelWithDebInfo_GroupOne:
     - key:
         prefix: msbuild-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1260,14 +1260,14 @@ Windows_MSBuild_RelWithDebInfo_GroupTwo:
     - key:
         prefix: msbuild-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
 
@@ -1305,7 +1305,7 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
     - key:
         prefix: msbuild-2022
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - deps
       - MSVC2022_64/deps/Qt
@@ -1313,14 +1313,14 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupOne-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
     - key:
         prefix: msbuild-2022-RelWithDebInfo-GroupTwo-$CI_COMMIT_REF_PROTECTED
         files:
-          - CI/deps_versions.msvc.sh
+          - out/ci/deps_versions.msvc.sh
       paths:
       - ccache
       policy: push
@@ -1341,15 +1341,15 @@ Windows_MSBuild_CacheInit_RelWithDebInfo:
       - ccache/
       - build/extern/fetched/
   before_script:
-    - CI/install_debian_deps.sh android
+    - out/ci/install_debian_deps.sh android
   stage: build
   script:
     - df -h
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - ccache -z -M "${CCACHE_SIZE}"
-    - CI/before_install.android.sh
-    - CI/before_script.android.sh
+    - out/ci/before_install.android.sh
+    - out/ci/before_script.android.sh
     - cd build
     - cmake --build . -- -j $(nproc)
     # - cmake --install .  # no one uses builds anyway, disable until 'no space left' is resolved

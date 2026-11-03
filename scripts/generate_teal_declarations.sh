@@ -5,7 +5,7 @@ fi
 
 SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 OPENMW_DIR=$(realpath $SCRIPTS_DIR/..)
-DOCS_DIR=$(realpath $OPENMW_DIR/docs)
+DOCS_DIR=$(realpath $OPENMW_DIR/doc)
 FILES_DIR=$(realpath $OPENMW_DIR/files)
 OUTPUT_DIR=$(realpath "$1")
 
