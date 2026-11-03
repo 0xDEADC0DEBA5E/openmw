@@ -1,7 +1,0 @@
-The openmw-osg, openmw-mygui-osx, and unshield overlays are copied from:
-https://github.com/OpenMW/openmw-deps-build
-Commit: d7864263754c6d80293153fbf0ffcbd120511a28
-License: Apache-2.0 (see LICENSE-OpenMW).
-
-The recastnavigation overlay packages the same OpenMW fork and source hash
-as the upstream OpenMW FetchContent declaration in extern/CMakeLists.txt.
