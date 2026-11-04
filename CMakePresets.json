@@ -3,6 +3,29 @@
   "cmakeMinimumRequired": { "major": 3, "minor": 20, "patch": 0 },
   "configurePresets": [
     {
+      "name": "linux-gcc16",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_MAKE_PROGRAM": "ninja",
+        "CMAKE_SYSTEM_NAME": "Linux"
+      }
+    },
+    {
+      "name": "linux-gcc16-debug",
+      "displayName": "Linux GCC 16 Debug",
+      "inherits": "linux-gcc16",
+      "binaryDir": "${sourceDir}/out/build/linux/gcc16-debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "linux-gcc16-release",
+      "displayName": "Linux GCC 16 Release",
+      "inherits": "linux-gcc16",
+      "binaryDir": "${sourceDir}/out/build/linux/gcc16-release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
       "name": "windows-gcc16",
       "hidden": true,
       "generator": "Ninja",
@@ -11,14 +34,7 @@
         "PATH": "$env{GCC16_BIN};$penv{PATH}"
       },
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "$env{GCC16_BIN}/gcc.exe",
-        "CMAKE_CXX_COMPILER": "$env{GCC16_BIN}/g++.exe",
-        "CMAKE_RC_COMPILER": "$env{GCC16_BIN}/windres.exe",
-        "CMAKE_MAKE_PROGRAM": "$env{GCC16_BIN}/ninja.exe",
-        "OPENMW_USE_VCPKG": "ON",
-        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic",
-        "VCPKG_HOST_TRIPLET": "x64-mingw-dynamic",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "CMAKE_SYSTEM_NAME": "Windows"
       }
     },
     {
@@ -37,6 +53,8 @@
     }
   ],
   "buildPresets": [
+    { "name": "linux-gcc16-debug", "configurePreset": "linux-gcc16-debug" },
+    { "name": "linux-gcc16-release", "configurePreset": "linux-gcc16-release" },
     { "name": "windows-gcc16-debug", "configurePreset": "windows-gcc16-debug" },
     { "name": "windows-gcc16-release", "configurePreset": "windows-gcc16-release" }
   ]

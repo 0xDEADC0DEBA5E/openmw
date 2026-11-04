@@ -49,10 +49,6 @@
     "platform": "!linux"
   },
   "sqlite3",
-  {
-    "name": "unshield",
-    "platform": "osx | linux"
-  },
   "yaml-cpp",
   "zlib",
   {

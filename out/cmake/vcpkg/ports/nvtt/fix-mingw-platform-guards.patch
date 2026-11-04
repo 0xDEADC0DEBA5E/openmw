@@ -1,0 +1,112 @@
+--- a/src/nvmath/Matrix.cpp
++++ b/src/nvmath/Matrix.cpp
+@@ -7,7 +7,9 @@
+ 
+ #include <float.h>
+ 
+-#if !NV_CC_MSVC && !NV_OS_ORBIS
++#if NV_OS_WIN32
++#include <malloc.h>
++#elif !NV_CC_MSVC && !NV_OS_ORBIS
+ #include <alloca.h>
+ #endif
+ 
+--- a/src/nvcore/Debug.cpp
++++ b/src/nvcore/Debug.cpp
+@@ -949,7 +949,7 @@
+ // Abnormal termination. Create mini dump and output call stack.
+ void debug::terminate(int code)
+ {
+-#if NV_OS_WIN32
++#if NV_OS_WIN32 && NV_CC_MSVC
+     EnterCriticalSection(&s_handler_critical_section);
+ 
+     writeMiniDump(NULL);
+@@ -1069,7 +1069,7 @@
+     s_assert_handler = NULL;
+ }
+ 
+-#if NV_OS_WIN32
++#if NV_OS_WIN32 && NV_CC_MSVC
+ #if NV_USE_SEPARATE_THREAD
+ 
+ static void initHandlerThread()
+--- a/extern/EtcLib/Etc/EtcConfig.h
++++ b/extern/EtcLib/Etc/EtcConfig.h
+@@ -58,7 +58,7 @@
+ #define USE_STB_IMAGE_LOAD 0	
+ 
+ #if ETC_WINDOWS
+-#include <SDKDDKVer.h>
++#include <sdkddkver.h>
+ #define _CRT_SECURE_NO_WARNINGS (1)
+ #include <tchar.h>
+ #endif
+--- a/src/nvthread/nvthread.cpp
++++ b/src/nvthread/nvthread.cpp
+@@ -6,6 +6,7 @@
+ 
+ #if NV_OS_WIN32
+ #include "Win32.h"
++#include <intrin.h>
+ #elif NV_OS_UNIX
+ #include <sys/types.h>
+ #if !NV_OS_LINUX
+--- a/src/nvthread/Thread.cpp
++++ b/src/nvthread/Thread.cpp
+@@ -60,6 +60,8 @@
+ 
+ static void setThreadName(DWORD dwThreadID, const char* threadName)
+ {
++    // The debugger naming exception requires MSVC structured exception handling.
++#if NV_CC_MSVC
+     THREADNAME_INFO info;
+     info.dwType = 0x1000;
+     info.szName = threadName;
+@@ -73,6 +75,7 @@
+     __except(EXCEPTION_EXECUTE_HANDLER)
+     {
+     }
++#endif
+ }
+ 
+ 
+--- a/extern/CMP_Core/source/cmp_math_vec4.h
++++ b/extern/CMP_Core/source/cmp_math_vec4.h
+@@ -327,7 +327,7 @@
+ #include <float.h> 
+ 
+ // SSE Vec4
+-#ifdef _LINUX
++#if defined(_LINUX) || defined(__MINGW32__)
+ class CMP_SSEVec4f
+ #else
+ #include "intrin.h"
+@@ -339,7 +339,7 @@
+     union
+     {
+         __m128 vec128;          // float Vector 128 bits in total (16 Bytes) = array of 4 floats
+-#ifdef _LINUX
++#if defined(_LINUX) || defined(__MINGW32__)
+         float f32[4];
+ #endif
+     };
+@@ -360,7 +360,7 @@
+     inline operator const __m128() const { return vec128; };
+ 
+     // indexing
+-#ifdef _LINUX
++#if defined(_LINUX) || defined(__MINGW32__)
+     inline const float& operator[](int i) const { return f32[i]; };
+     inline float& operator[](int i) { return f32[i]; };
+ #else
+--- a/extern/CMP_Core/shaders/BC6_Encode_kernel.h
++++ b/extern/CMP_Core/shaders/BC6_Encode_kernel.h
+@@ -67,6 +67,7 @@
+ 
+ #ifndef ASPM_GPU
+ #include <bitset>
++#include <string.h>
+ #include <assert.h>
+ //typedef uint8_t        byte;
+ #else

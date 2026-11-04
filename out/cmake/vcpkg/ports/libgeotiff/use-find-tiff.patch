@@ -1,0 +1,15 @@
+diff --git a/libgeotiff/CMakeLists.txt b/libgeotiff/CMakeLists.txt
+--- a/libgeotiff/CMakeLists.txt
++++ b/libgeotiff/CMakeLists.txt
+@@ -236,10 +236,7 @@ ENDIF()
+ 
+ 
+ IF(WITH_TIFF)
+-    FIND_PACKAGE(TIFF NO_MODULE QUIET)
+-    if (NOT TIFF_FOUND)
+-      FIND_PACKAGE(TIFF REQUIRED)
+-    endif ()
++    FIND_PACKAGE(TIFF MODULE REQUIRED)
+ 
+     IF(TIFF_FOUND)
+         # Confirm required API is available

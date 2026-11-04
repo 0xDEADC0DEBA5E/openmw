@@ -19,6 +19,7 @@ set(DOC_PROJECT_DIR "${DEV_PROJECT_DIR}/doc")
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
+include("${OUT_PROJECT_DIR}/cmake/platform.cmake")
 include("${OUT_PROJECT_DIR}/cmake/vcpkg.cmake")
 project(${RPG} VERSION ${RPG_VERSION} LANGUAGES C CXX)
 

@@ -93,5 +93,5 @@ venv/
 .DS_Store
 Thumbs.db
 
-out/vcpkg
-out/toolchains
+out/vcpkg/
+out/toolchains/
