@@ -32,11 +32,8 @@
       "vendor": {
         "jetbrains.com/clion": { "toolchain": "MinGW" }
       },
-      "environment": {
-        "GCC16_BIN": "C:/msys64/mingw64/bin",
-        "PATH": "$env{GCC16_BIN};$penv{PATH}"
-      },
       "cacheVariables": {
+        "CMAKE_MAKE_PROGRAM": "ninja",
         "CMAKE_SYSTEM_NAME": "Windows"
       }
     },

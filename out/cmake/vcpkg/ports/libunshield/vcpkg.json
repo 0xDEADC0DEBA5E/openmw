@@ -1,0 +1,19 @@
+{
+  "name": "libunshield",
+  "version": "1.6.2",
+  "description": "InstallShield cabinet extraction library for the OpenMW installation wizard",
+  "homepage": "https://github.com/twogood/unshield",
+  "license": "MIT",
+  "supports": "!windows",
+  "dependencies": [
+    "zlib",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

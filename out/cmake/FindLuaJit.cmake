@@ -12,3 +12,10 @@ libfind_pkg_detect(LuaJit luajit
 
 libfind_process(LuaJit)
 
+# Static LuaJIT needs the platform math and dynamic-loader libraries as well.
+# Keep the library selected by find_library (including its Debug variant).
+if(LuaJit_FOUND AND UNIX AND NOT APPLE)
+    list(APPEND LuaJit_LIBRARIES m ${CMAKE_DL_LIBS})
+    list(REMOVE_DUPLICATES LuaJit_LIBRARIES)
+endif()
+

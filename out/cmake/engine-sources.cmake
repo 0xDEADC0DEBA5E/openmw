@@ -1,4 +1,4 @@
-project (Components)
+# Engine source lists and generated files from the upstream components build.
 
 if(APPLE)
     set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
@@ -14,14 +14,14 @@ if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
     add_custom_target (get-version
        BYPRODUCTS "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
-       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/version/version.cpp.in"
+       DEPENDS "${ENGINE_SOURCE_DIR}/version/version.cpp.in"
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DOpenMW_SOURCE_DIR=${OpenMW_SOURCE_DIR}
-            -DOpenMW_BINARY_DIR=f${OpenMW_BINARY_DIR}
+            -DOpenMW_BINARY_DIR=${OpenMW_BINARY_DIR}
             -DVERSION_RESOURCE_FILE_IN=${VERSION_RESOURCE_FILE_IN}
             -DVERSION_RESOURCE_FILE_RELATIVE=${VERSION_RESOURCE_FILE_RELATIVE}
-            -DVERSION_CPP_FILE_IN=${CMAKE_CURRENT_SOURCE_DIR}/version/version.cpp.in
+            -DVERSION_CPP_FILE_IN=${ENGINE_SOURCE_DIR}/version/version.cpp.in
             -DVERSION_CPP_FILE_OUT=${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}.out
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
@@ -39,7 +39,7 @@ if (GIT_CHECKOUT)
         VERBATIM)
 else (GIT_CHECKOUT)
     configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})
-    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version/version.cpp.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
+    configure_file("${ENGINE_SOURCE_DIR}/version/version.cpp.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 endif (GIT_CHECKOUT)
 
 list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
@@ -60,22 +60,22 @@ list(TRANSFORM USED_OSG_PLUGIN_NAMES_FORMATTED APPEND "\"")
 list(JOIN USED_OSG_PLUGIN_NAMES_FORMATTED ", " USED_OSG_PLUGIN_NAMES_FORMATTED)
 
 set(OSG_PLUGIN_CHECKER_CPP_FILE "components/misc/osgpluginchecker.cpp")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/misc/osgpluginchecker.cpp.in" "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
+configure_file("${ENGINE_SOURCE_DIR}/misc/osgpluginchecker.cpp.in" "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
 list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}")
 
 # source files
 
-add_component_dir (lua
+add_component_dir ("${ENGINE_SOURCE_DIR}/lua"
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
     shapes/box inputactions yamlloader scripttracker luastateptr
     )
-copy_resource_file("lua/util.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/util.lua")
+copy_resource_file("${ENGINE_SOURCE_DIR}/lua/util.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/util.lua")
 
-add_component_dir (l10n
+add_component_dir ("${ENGINE_SOURCE_DIR}/l10n"
     messagebundles manager
     )
 
-add_component_dir (settings
+add_component_dir ("${ENGINE_SOURCE_DIR}/settings"
     categories
     categories/camera
     categories/cells
@@ -115,15 +115,15 @@ add_component_dir (settings
     windowmode
     )
 
-add_component_dir (bgsm
+add_component_dir ("${ENGINE_SOURCE_DIR}/bgsm"
     stream file
     )
 
-add_component_dir (bsa
+add_component_dir ("${ENGINE_SOURCE_DIR}/bsa"
     bsafile compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
 
-add_component_dir (bullethelpers
+add_component_dir ("${ENGINE_SOURCE_DIR}/bullethelpers"
     collisionobject
     heightfield
     operators
@@ -131,20 +131,20 @@ add_component_dir (bullethelpers
     transformboundingbox
     )
 
-add_component_dir (vfs
+add_component_dir ("${ENGINE_SOURCE_DIR}/vfs"
     manager archive bsaarchive filesystemarchive pathutil registerarchives
     )
 
-add_component_dir (resource
+add_component_dir ("${ENGINE_SOURCE_DIR}/resource"
     scenemanager keyframemanager imagemanager animblendrulesmanager bulletshapemanager bulletshape niffilemanager objectcache resourcesystem
     resourcemanager stats animation foreachbulletobject errormarker cachestats bgsmfilemanager
     )
 
-add_component_dir (shader
+add_component_dir ("${ENGINE_SOURCE_DIR}/shader"
     shadermanager shadervisitor removedalphafunc
     )
 
-add_component_dir (sceneutil
+add_component_dir ("${ENGINE_SOURCE_DIR}/sceneutil"
     clone attach visitor util statesetupdater stateupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     detourdebugdraw navmesh agentpath animblendrules shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
@@ -152,24 +152,24 @@ add_component_dir (sceneutil
     cullsafeboundsvisitor keyframe nodecallback templateref textkeymap userdata glextensions fog texmat material
     )
 
-add_component_dir (nif
+add_component_dir ("${ENGINE_SOURCE_DIR}/nif"
     base controller data effect extra niffile nifkey nifstream niftypes node parent particle physics property record recordptr texture
     )
 
-add_component_dir (nifosg
+add_component_dir ("${ENGINE_SOURCE_DIR}/nifosg"
     autotransform nifloader controller particle matrixtransform
     )
 
-add_component_dir (nifbullet
+add_component_dir ("${ENGINE_SOURCE_DIR}/nifbullet"
     bulletnifloader
     )
 
-add_component_dir (toutf8
+add_component_dir ("${ENGINE_SOURCE_DIR}/toutf8"
     tablesgen
     toutf8
     )
 
-add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
+add_component_dir("${ENGINE_SOURCE_DIR}/esm" attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
     formid
     fourcc
     stringrefid
@@ -182,11 +182,11 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     exteriorcelllocation
     )
 
-add_component_dir(fx pass technique lexer lexertypes parseconstants widgets stateupdater)
+add_component_dir("${ENGINE_SOURCE_DIR}/fx" pass technique lexer lexertypes parseconstants widgets stateupdater)
 
-add_component_dir(std140 ubo)
+add_component_dir("${ENGINE_SOURCE_DIR}/std140" ubo)
 
-add_component_dir (esm3
+add_component_dir ("${ENGINE_SOURCE_DIR}/esm3"
     esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loaddial loaddoor loadench loadfact loadglob loadgmst
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc
@@ -200,12 +200,12 @@ add_component_dir (esm3
     refnum actoridconverter
     )
 
-add_component_dir (esmterrain
+add_component_dir ("${ENGINE_SOURCE_DIR}/esmterrain"
     gridsampling
     storage
     )
 
-add_component_dir (esm4
+add_component_dir ("${ENGINE_SOURCE_DIR}/esm4"
     actor
     cellgrid
     common
@@ -303,75 +303,75 @@ add_component_dir (esm4
     vertex
 )
 
-add_component_dir (misc
+add_component_dir ("${ENGINE_SOURCE_DIR}/misc"
     barrier budgetmeasurement color compression constants convert coordinateconverter display endianness float16 frameratelimiter framestats
     guarded math mathutil messageformatparser notnullptr objectpool osgpluginchecker osguservalues progressreporter resourcehelpers
     rng strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
     )
 
-add_component_dir (misc/strings
+add_component_dir ("${ENGINE_SOURCE_DIR}/misc/strings"
     algorithm conversion format lower
     )
 
-add_component_dir (stereo
+add_component_dir ("${ENGINE_SOURCE_DIR}/stereo"
     frustum multiview stereomanager types
     )
 
-add_component_dir (debug
+add_component_dir ("${ENGINE_SOURCE_DIR}/debug"
     debugging debuglog gldebug debugdraw writeflags
     )
-add_component_dir (files
+add_component_dir ("${ENGINE_SOURCE_DIR}/files"
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
     istreamptr streamwithbuffer utils
     )
 
 if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    set_source_files_properties(files/configfileparser.cpp PROPERTIES COMPILE_FLAGS -Wno-shadow)
+    set_source_files_properties("${ENGINE_SOURCE_DIR}/files/configfileparser.cpp" PROPERTIES COMPILE_FLAGS -Wno-shadow)
 endif()
 
 if (NOT WIN32 AND NOT APPLE)
-    set_source_files_properties(files/linuxpath.cpp PROPERTIES COMPILE_DEFINITIONS "GLOBAL_DATA_PATH=\"${GLOBAL_DATA_PATH}\";GLOBAL_CONFIG_PATH=\"${GLOBAL_CONFIG_PATH}\"")
+    set_source_files_properties("${ENGINE_SOURCE_DIR}/files/linuxpath.cpp" PROPERTIES COMPILE_DEFINITIONS "GLOBAL_DATA_PATH=\"${GLOBAL_DATA_PATH}\";GLOBAL_CONFIG_PATH=\"${GLOBAL_CONFIG_PATH}\"")
 endif ()
 
-add_component_dir (compiler
+add_component_dir ("${ENGINE_SOURCE_DIR}/compiler"
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
     stringparser tokenloc nullerrorhandler opcodes extensions0 declarationparser
     quickfileparser discardparser junkparser
     )
 
-add_component_dir (interpreter
+add_component_dir ("${ENGINE_SOURCE_DIR}/interpreter"
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
     miscopcodes opcodes program runtime types defines
     )
 
-add_component_dir (translation
+add_component_dir ("${ENGINE_SOURCE_DIR}/translation"
     translation
     )
 
-add_component_dir (terrain
+add_component_dir ("${ENGINE_SOURCE_DIR}/terrain"
     storage world buffercache defs terraingrid material terraindrawable texturemanager chunkmanager compositemaprenderer
     quadtreeworld quadtreenode viewdata cellborder view heightcull
     )
 
-add_component_dir (loadinglistener
+add_component_dir ("${ENGINE_SOURCE_DIR}/loadinglistener"
     loadinglistener asynclistener
     )
 
-add_component_dir (myguiplatform
+add_component_dir ("${ENGINE_SOURCE_DIR}/myguiplatform"
     myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener additivelayer scalinglayer
     )
 
-add_component_dir (widgets
+add_component_dir ("${ENGINE_SOURCE_DIR}/widgets"
     box fontwrapper imagebutton tags list numericeditbox sharedstatebutton windowcaption widgets
     )
 
-add_component_dir (fontloader
+add_component_dir ("${ENGINE_SOURCE_DIR}/fontloader"
     fontloader
     )
 
-add_component_dir (sdlutil
+add_component_dir ("${ENGINE_SOURCE_DIR}/sdlutil"
     events
     gl4esinit
     imagetosurface
@@ -383,39 +383,39 @@ add_component_dir (sdlutil
     vsyncmode
     )
 
-add_component_dir (version
+add_component_dir ("${ENGINE_SOURCE_DIR}/version"
     version
     )
 
-add_component_dir (fallback
+add_component_dir ("${ENGINE_SOURCE_DIR}/fallback"
     fallback validate
     )
 
-add_component_dir (lua_ui
+add_component_dir ("${ENGINE_SOURCE_DIR}/lua_ui"
     registerscriptsettings scriptsettings
     properties widget input element util layers content alignment resources
     adapter text textedit window image container flex padding
     )
-copy_resource_file("lua_ui/content.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/content.lua")
+copy_resource_file("${ENGINE_SOURCE_DIR}/lua_ui/content.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/content.lua")
 
 
 if(WIN32)
-    add_component_dir (crashcatcher
+    add_component_dir ("${ENGINE_SOURCE_DIR}/crashcatcher"
         windowscrashcatcher
         windowscrashdumppathhelpers
         windowscrashmonitor
         windowscrashshm
     )
 elseif(NOT ANDROID)
-    add_component_dir (crashcatcher
+    add_component_dir ("${ENGINE_SOURCE_DIR}/crashcatcher"
         crashcatcher
     )
     if (EXTRA_DEBUGINFOD_URLS)
-        set_source_files_properties(crashcatcher/crashcatcher.cpp PROPERTIES COMPILE_DEFINITIONS "EXTRA_DEBUGINFOD_URLS=\"${EXTRA_DEBUGINFOD_URLS}\"")
+        set_source_files_properties("${ENGINE_SOURCE_DIR}/crashcatcher/crashcatcher.cpp" PROPERTIES COMPILE_DEFINITIONS "EXTRA_DEBUGINFOD_URLS=\"${EXTRA_DEBUGINFOD_URLS}\"")
     endif ()
 endif()
 
-add_component_dir(detournavigator
+add_component_dir("${ENGINE_SOURCE_DIR}/detournavigator"
     agentbounds
     areatype
     asyncnavmeshupdater
@@ -480,93 +480,93 @@ add_component_dir(detournavigator
     waitconditiontype
     )
 
-add_component_dir(loadinglistener
+add_component_dir("${ENGINE_SOURCE_DIR}/loadinglistener"
     reporter
     )
 
-add_component_dir(serialization
+add_component_dir("${ENGINE_SOURCE_DIR}/serialization"
     binaryreader
     binarywriter
     osgyaml
     sizeaccumulator
     )
 
-add_component_dir(sqlite3
+add_component_dir("${ENGINE_SOURCE_DIR}/sqlite3"
     db
     request
     statement
     transaction
 )
 
-add_component_dir(esmloader
+add_component_dir("${ENGINE_SOURCE_DIR}/esmloader"
     lessbyid
     load
     esmdata
 )
 
-add_component_dir(navmeshtool
+add_component_dir("${ENGINE_SOURCE_DIR}/navmeshtool"
     protocol
     )
 
-add_component_dir(platform
+add_component_dir("${ENGINE_SOURCE_DIR}/platform"
     platform
     file
     )
 
 if (WIN32)
-    add_component_dir(platform
+    add_component_dir("${ENGINE_SOURCE_DIR}/platform"
         filewin32
         )
 elseif (UNIX)
-    add_component_dir(platform
+    add_component_dir("${ENGINE_SOURCE_DIR}/platform"
         fileposix
         )
 else ()
-    add_component_dir(platform
+    add_component_dir("${ENGINE_SOURCE_DIR}/platform"
         filestdio
         )
 endif()
 
-add_component_dir(testing
+add_component_dir("${ENGINE_SOURCE_DIR}/testing"
     expecterror
     util
 )
 
 if (USE_QT)
-    add_component_qt_dir (contentselector
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/contentselector"
         model/modelitem model/esmfile
         model/contentmodel
         model/loadordererror
         view/combobox view/contentselector
         )
 
-    add_component_qt_dir (config
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/config"
         gamesettings
         launchersettings
         )
 
-    add_component_qt_dir (l10n
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/l10n"
         qttranslations
         )
 
-    add_component_qt_dir (process
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/process"
         processinvoker
         )
 
-    add_component_qt_dir (misc
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/misc"
         helpviewer utf8qtextstream hash scalableicon
         )
 
-    add_component_qt_dir (files
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/files"
         qtconversion
         qtconfigpath
         )
 
-    add_component_qt_dir (platform
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/platform"
         application
         )
 
-    add_component_qt_dir (vfs
+    add_component_qt_dir ("${ENGINE_SOURCE_DIR}/vfs"
         qtconversion
         )
 
@@ -578,187 +578,10 @@ if (MSVC)
     # this option (make sure you're not looking at the docs for the identically-named linker option) stops four codegen threads being spun off
     # it hurts build time ~33% to enable this unnecessarily, though, so target it to the hungriest boys
     set_source_files_properties(
-        detournavigator/tilecachedrecastmeshmanager.cpp
-        lua/utilpackage.cpp
+        "${ENGINE_SOURCE_DIR}/detournavigator/tilecachedrecastmeshmanager.cpp"
+        "${ENGINE_SOURCE_DIR}/lua/utilpackage.cpp"
         PROPERTIES
         COMPILE_OPTIONS /cgthreads1
     )
 endif()
 
-include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
-
-if (OPENMW_USE_SYSTEM_SQLITE3)
-    find_package(SQLite3 REQUIRED)
-    if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
-        add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
-    endif()
-endif()
-
-openmw_add_engine_target(${COMPONENT_FILES})
-
-if (ANDROID)
-    set_property(TARGET components PROPERTY POSITION_INDEPENDENT_CODE ON)
-endif()
-
-if (APPLE)
-    target_compile_definitions(components PUBLIC GL_SILENCE_DEPRECATION=1)
-endif()
-
-target_link_libraries(components PUBLIC
-    # CMake's built-in OSG finder does not use pkgconfig, so we have to
-    # manually ensure the order is correct for inter-library dependencies.
-    # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
-    # https://gitlab.kitware.com/cmake/cmake/-/issues/21701
-    ${OSGPARTICLE_LIBRARIES}
-    ${OSGVIEWER_LIBRARIES}
-    ${OSGSHADOW_LIBRARIES}
-    ${OSGANIMATION_LIBRARIES}
-    ${OSGGA_LIBRARIES}
-    ${OSGTEXT_LIBRARIES}
-    ${OSGDB_LIBRARIES}
-    ${OSGUTIL_LIBRARIES}
-    ${OSGSIM_LIBRARIES}
-    ${OSG_LIBRARIES}
-    ${OPENTHREADS_LIBRARIES}
-
-    Boost::program_options
-    Boost::iostreams
-
-    SDL2::SDL2
-    ${OPENGL_gl_LIBRARY}
-    ${MyGUI_LIBRARIES}
-    ${LUA_LIBRARIES}
-    LZ4::LZ4
-    RecastNavigation::DebugUtils
-    RecastNavigation::Detour
-    RecastNavigation::Recast
-
-    Base64
-    SQLite3::SQLite3
-    smhasher
-    ${ICU_LIBRARIES}
-    ZLIB::ZLIB
-    )
-
-if(yaml-cpp_VERSION VERSION_GREATER_EQUAL 0.8.0)
-    target_link_libraries(components PUBLIC yaml-cpp::yaml-cpp)
-else()
-    target_link_libraries(components PUBLIC yaml-cpp)
-endif()
-
-target_link_libraries(components PUBLIC ${BULLET_LIBRARIES})
-
-if (USE_QT)
-    add_library(components_qt STATIC ${COMPONENT_QT_FILES})
-    target_link_libraries(components_qt components Qt::Widgets Qt::Core)
-
-    if (BUILD_LAUNCHER OR BUILD_WIZARD)
-        add_dependencies(components_qt qm-files)
-    endif()
-
-    if (BUILD_WITH_CODE_COVERAGE)
-        target_compile_options(components_qt PRIVATE --coverage)
-        target_link_libraries(components_qt gcov)
-    endif()
-endif()
-
-if (OSG_STATIC AND CMAKE_SYSTEM_NAME MATCHES "Linux")
-    find_package(X11 REQUIRED COMPONENTS Xinerama Xrandr)
-    target_link_libraries(components PUBLIC ${CMAKE_DL_LIBS} X11::X11 X11::Xinerama X11::Xrandr)
-    find_package(Fontconfig MODULE)
-    if(Fontconfig_FOUND)
-        target_link_libraries(components PUBLIC Fontconfig::Fontconfig)
-    endif()
-endif()
-
-if (WIN32)
-    target_link_libraries(components PUBLIC shlwapi)
-endif()
-
-# Fix for not visible pthreads functions for linker with glibc 2.15
-if (UNIX AND NOT APPLE)
-    target_link_libraries(components PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-endif()
-
-if (BUILD_WITH_CODE_COVERAGE)
-    target_compile_options(components PRIVATE --coverage)
-    target_link_libraries(components PUBLIC gcov)
-endif()
-
-
-# Make the variable accessible for other subdirectories
-set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
-
-target_compile_definitions(components PUBLIC
-    BT_USE_DOUBLE_PRECISION
-    MYGUI_DONT_USE_OBSOLETE=ON
-)
-
-if(OSG_STATIC)
-    if(CMAKE_VERSION VERSION_LESS 3.24)
-        unset(_osg_plugins_static_files)
-        add_library(components_osg_plugins INTERFACE)
-        foreach(_plugin ${USED_OSG_PLUGINS})
-            string(TOUPPER ${_plugin} _plugin_uc)
-            if(OPENMW_USE_SYSTEM_OSG)
-                list(APPEND _osg_plugins_static_files ${${_plugin_uc}_LIBRARY})
-            else()
-                list(APPEND _osg_plugins_static_files $<TARGET_FILE:${${_plugin_uc}_LIBRARY}>)
-                target_link_libraries(components_osg_plugins INTERFACE $<TARGET_PROPERTY:${${_plugin_uc}_LIBRARY},LINK_LIBRARIES>)
-                add_dependencies(components_osg_plugins ${${_plugin_uc}_LIBRARY})
-            endif()
-        endforeach()
-        # We use --whole-archive because OSG plugins use registration.
-        get_whole_archive_options(_opts ${_osg_plugins_static_files})
-        target_link_options(components_osg_plugins INTERFACE ${_opts})
-        target_link_libraries(components PUBLIC components_osg_plugins)
-    else()
-        target_link_libraries(components PUBLIC "$<LINK_LIBRARY:WHOLE_ARCHIVE,${USED_OSG_PLUGINS}>")
-    endif()
-
-    target_link_libraries(components PUBLIC ${COLLADA_DOM_LIBRARIES})
-
-    if(OPENMW_USE_SYSTEM_OSG)
-        # OSG plugin pkgconfig files are missing these dependencies.
-        # https://github.com/openscenegraph/OpenSceneGraph/issues/1052
-        find_package(Freetype REQUIRED)
-        find_package(JPEG REQUIRED)
-        find_package(PNG REQUIRED)
-        target_link_libraries(components PUBLIC Freetype::Freetype JPEG::JPEG PNG::PNG)
-    endif()
-endif(OSG_STATIC)
-
-if(USE_QT)
-    set_property(TARGET components_qt PROPERTY AUTOMOC ON)
-    set_property(TARGET components_qt PROPERTY AUTOUIC ON)
-    set_property(TARGET components_qt PROPERTY AUTOUIC_SEARCH_PATHS contentselector)
-endif(USE_QT)
-
-if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
-    target_precompile_headers(components PUBLIC
-        <sol/sol.hpp>
-
-        <osg/State>
-        <osg/StateSet>
-        <osg/Node>
-        <osg/Drawable>
-        <osg/Camera>
-
-        <MyGUI_Widget.h>
-
-        <algorithm>
-        <filesystem>
-        <fstream>
-        <functional>
-        <memory>
-        <ostream>
-        <string>
-        <vector>
-    )
-
-    target_precompile_headers(components PRIVATE
-        <osgViewer/Viewer>
-
-        <boost/program_options/options_description.hpp>
-    )
-endif()

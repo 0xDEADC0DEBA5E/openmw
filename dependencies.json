@@ -28,7 +28,7 @@
     "platform": "!osx"
   },
   "openal-soft",
-  "osg",
+  "openmw-osg",
   {
     "name": "openmw-mygui-osx",
     "platform": "osx"
@@ -82,5 +82,9 @@
       "linguist"
     ]
   },
-  "qttranslations"
+  "qttranslations",
+  {
+    "name": "libunshield",
+    "platform": "!windows"
+  }
 ]

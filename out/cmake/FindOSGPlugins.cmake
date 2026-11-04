@@ -48,6 +48,11 @@ foreach(_library ${OSGPlugins_FIND_COMPONENTS})
     # of prefixes CMake searches for (via osg_find_library) to support these systems.
     set(_saved_lib_prefix "${CMAKE_FIND_LIBRARY_PREFIXES}") # save CMAKE_FIND_LIBRARY_PREFIXES
     list(APPEND CMAKE_FIND_LIBRARY_PREFIXES "") # search libraries with no prefix
+    if(MINGW)
+        # OSG's MinGW modules use mingw_osgdb_*.dll, including a trailing d
+        # before .dll for the Debug variants handled by osg_find_library.
+        list(APPEND CMAKE_FIND_LIBRARY_PREFIXES "mingw_")
+    endif()
     set(_saved_lib_suffix "${CMAKE_FIND_LIBRARY_SUFFIXES}")
     if(WIN32)
         # find_library isn't supposed to find DLLs, it's supposed to find their import libraries, but these are modules, so don't have import libraries

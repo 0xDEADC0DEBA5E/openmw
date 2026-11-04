@@ -518,7 +518,7 @@ if(OSG_STATIC)
         set(COLLADA_DOM_VERSION_MINOR 5)
     endif()
 
-    find_package(collada_dom 2.5)
+    find_package(collada_dom 2.5 REQUIRED CONFIG PATH_SUFFIXES share/collada-dom)
 
     link_directories(${COLLADA_DOM_LIBRARY_DIRS})
 
@@ -1213,10 +1213,19 @@ if (USE_QT)
         qt_add_translation(QM_FILES ${TS_FILES} OPTIONS -silent)
 
         if (DEPLOY_QT_TRANSLATIONS)
+            set(QT_TRANSLATIONS_DIR "" CACHE PATH "Target Qt translations directory")
             # Once we set a Qt 6.2.0 as a minimum required version, we may use "qtpaths --qt-query" instead.
-            get_target_property(QT_QMAKE_EXECUTABLE Qt::qmake IMPORTED_LOCATION)
-            execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query QT_INSTALL_TRANSLATIONS
-                OUTPUT_VARIABLE QT_TRANSLATIONS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+            if(NOT QT_TRANSLATIONS_DIR)
+                if(CMAKE_CROSSCOMPILING AND EXISTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/translations/Qt6")
+                    # The runnable qmake belongs to the host, but deployment
+                    # needs the translations installed for the target.
+                    set(QT_TRANSLATIONS_DIR "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/translations/Qt6")
+                else()
+                    get_target_property(QT_QMAKE_EXECUTABLE Qt::qmake IMPORTED_LOCATION)
+                    execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query QT_INSTALL_TRANSLATIONS
+                        OUTPUT_VARIABLE QT_TRANSLATIONS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+                endif()
+            endif()
 
             foreach(QM_FILE ${QM_FILES})
                 get_filename_component(QM_BASENAME ${QM_FILE} NAME)

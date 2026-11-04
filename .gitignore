@@ -4,6 +4,7 @@ CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
 Makefile
+!/out/cmake/vcpkg/ports/libpq/Makefile
 makefile
 build*/
 prebuilt

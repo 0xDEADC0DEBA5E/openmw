@@ -1,5 +1,19 @@
 # Resolve the engine's dependencies before passing them to PROJECT_TEMPLATE.
 include("${OUT_PROJECT_DIR}/cmake/project.cmake")
+include("${OUT_PROJECT_DIR}/cmake/engine-sources.cmake")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/include")
+file(CREATE_LINK "${ENGINE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/include/components"
+    SYMBOLIC RESULT engine_include_link_result)
+if(NOT engine_include_link_result STREQUAL "0")
+    # Windows may require privileges for directory symlinks. Forward headers
+    # instead, so source edits stay visible without maintaining a copied tree.
+    file(GLOB_RECURSE engine_headers RELATIVE "${ENGINE_SOURCE_DIR}"
+        "${ENGINE_SOURCE_DIR}/*.h" "${ENGINE_SOURCE_DIR}/*.hpp")
+    foreach(header IN LISTS engine_headers)
+        file(WRITE "${CMAKE_BINARY_DIR}/include/components/${header}"
+            "#pragma once\n#include \"${ENGINE_SOURCE_DIR}/${header}\"\n")
+    endforeach()
+endif()
 list(PREPEND CMAKE_MODULE_PATH "${OUT_PROJECT_DIR}/cmake")
 
 find_package(OpenGL REQUIRED)
@@ -13,21 +27,29 @@ find_package(QT REQUIRED COMPONENTS Core NAMES Qt6)
 find_package(Qt6 COMPONENTS Core Widgets Network OpenGL OpenGLWidgets LinguistTools Svg REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc i18n data)
 find_package(yaml-cpp REQUIRED)
-find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+if(NOT FFmpeg_FOUND)
+    find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE)
+endif()
 find_package(Boost 1.70 CONFIG REQUIRED COMPONENTS iostreams program_options)
-find_package(MyGUI 3.4.3 REQUIRED)
+if(NOT MyGUI_FOUND)
+    find_package(MyGUI 3.4.3 REQUIRED)
+endif()
 find_package(SDL2 2.26 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(RecastNavigation CONFIG REQUIRED)
+if(NOT TARGET RecastNavigation::Detour)
+    find_package(RecastNavigation CONFIG REQUIRED)
+endif()
 
-find_package(Bullet CONFIGS BulletConfig-float64.cmake QUIET COMPONENTS BulletCollision LinearMath)
-if(BULLET_FOUND)
-    if(NOT IS_ABSOLUTE "${BULLET_INCLUDE_DIRS}")
-        set(BULLET_INCLUDE_DIRS "${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS}")
+if(NOT BULLET_FOUND)
+    find_package(Bullet CONFIGS BulletConfig-float64.cmake QUIET COMPONENTS BulletCollision LinearMath)
+    if(BULLET_FOUND)
+        if(NOT IS_ABSOLUTE "${BULLET_INCLUDE_DIRS}")
+            set(BULLET_INCLUDE_DIRS "${BULLET_ROOT_DIR}/${BULLET_INCLUDE_DIRS}")
+        endif()
+    else()
+        find_package(Bullet 287 REQUIRED COMPONENTS BulletCollision LinearMath)
     endif()
-else()
-    find_package(Bullet 287 REQUIRED COMPONENTS BulletCollision LinearMath)
 endif()
 
 option(USE_LUAJIT "Use LuaJIT instead of Lua" ON)
@@ -42,7 +64,9 @@ endif()
 
 set(USED_OSG_COMPONENTS
     osgAnimation osgDB osgGA osgFX osgParticle osgText osgUtil osgShadow osgSim osgViewer)
-find_package(OpenSceneGraph 3.6.5 REQUIRED COMPONENTS ${USED_OSG_COMPONENTS})
+if(NOT OPENSCENEGRAPH_FOUND)
+    find_package(OpenSceneGraph 3.6.5 REQUIRED COMPONENTS ${USED_OSG_COMPONENTS})
+endif()
 
 if(USE_SYSTEM_TINYXML)
     find_package(TinyXML REQUIRED)
@@ -79,9 +103,11 @@ PROJECT_TEMPLATE(
         PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpp/src
         INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpp/api
-        GLOB_SOURCES
-        GLOB_INCLUDES
+        SOURCE_FILES ${COMPONENT_FILES} ${COMPONENT_QT_FILES}
         INCLUDES
+        ${ENGINE_SOURCE_DIR}
+        ${OpenMW_BINARY_DIR}
+        ${CMAKE_BINARY_DIR}/include
         ${OPENSCENEGRAPH_INCLUDE_DIRS}
         ${BULLET_INCLUDE_DIRS}
         ${MyGUI_INCLUDE_DIRS}
@@ -134,3 +160,38 @@ PROJECT_TEMPLATE(
         Threads::Threads
         ${ENGINE_YAML_LIBRARY}
 )
+
+# Preserve the target names used by the existing applications.
+add_library(components ALIAS ${RPG}-engine)
+add_library(components_qt ALIAS ${RPG}-engine)
+set_target_properties(${RPG}-engine PROPERTIES
+    AUTOMOC ON
+    AUTOUIC ON
+    AUTOUIC_SEARCH_PATHS "${ENGINE_SOURCE_DIR}/contentselector")
+if(TARGET get-version)
+    add_dependencies(${RPG}-engine get-version)
+endif()
+if(WIN32)
+    target_link_libraries(${RPG}-engine PUBLIC shlwapi)
+endif()
+if(OSG_STATIC)
+    # OSG plugins register through static initializers, so retain their objects.
+    if(CMAKE_VERSION VERSION_LESS 3.24)
+        get_whole_archive_options(plugin_options ${USED_OSG_PLUGINS})
+        target_link_options(${RPG}-engine PUBLIC ${plugin_options})
+    else()
+        target_link_libraries(${RPG}-engine PUBLIC
+            "$<LINK_LIBRARY:WHOLE_ARCHIVE,${USED_OSG_PLUGINS}>")
+    endif()
+    find_package(Freetype REQUIRED)
+    find_package(JPEG REQUIRED)
+    find_package(PNG REQUIRED)
+    target_link_libraries(${RPG}-engine PUBLIC
+        ${COLLADA_DOM_LIBRARIES} Freetype::Freetype JPEG::JPEG PNG::PNG)
+endif()
+if(OSG_STATIC AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(${RPG}-engine PUBLIC X11::X11 X11::Xinerama X11::Xrandr)
+    if(TARGET Fontconfig::Fontconfig)
+        target_link_libraries(${RPG}-engine PUBLIC Fontconfig::Fontconfig)
+    endif()
+endif()

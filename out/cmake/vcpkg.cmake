@@ -50,6 +50,9 @@ endif ()
 # out/vcpkg/${PLATFORM}/buildtrees/versioning_/versions/spirv-tools/ if that
 # baseline moves, otherwise the overlay silently holds spirv-tools back.
 list(PREPEND VCPKG_OVERLAY_PORTS "${OUT_PROJECT_DIR}/cmake/vcpkg/ports")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    list(PREPEND VCPKG_OVERLAY_PORTS "${OUT_PROJECT_DIR}/cmake/vcpkg/windows-ports")
+endif()
 list(REMOVE_DUPLICATES VCPKG_OVERLAY_PORTS)
 set(VCPKG_OVERLAY_PORTS "${VCPKG_OVERLAY_PORTS}" CACHE STRING
     "Project and user vcpkg overlay ports" FORCE)

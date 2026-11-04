@@ -52,7 +52,12 @@ if(VCPKG_DETECTED_MSVC)
 
 else()
     vcpkg_list(SET options)
-    if(VCPKG_CROSSCOMPILING)
+    if(VCPKG_CROSSCOMPILING AND VCPKG_TARGET_IS_MINGW)
+        # buildvm encodes the target OS as well as the architecture. The host
+        # port's Linux buildvm cannot emit PE objects or the Windows ABI.
+        find_program(luajit_host_cc NAMES cc gcc clang REQUIRED)
+        list(APPEND options "HOST_CC=${luajit_host_cc}")
+    elseif(VCPKG_CROSSCOMPILING)
         list(APPEND options
             "LJARCH=${VCPKG_TARGET_ARCHITECTURE}"
             "BUILDVM_X=${CURRENT_HOST_INSTALLED_DIR}/manual-tools/${PORT}/buildvm-${VCPKG_TARGET_ARCHITECTURE}${VCPKG_HOST_EXECUTABLE_SUFFIX}"
@@ -88,6 +93,7 @@ else()
         COPY_SOURCE
         OPTIONS
             "BUILDMODE=${VCPKG_LIBRARY_LINKAGE}"
+            ${make_options}
             ${options}
         OPTIONS_RELEASE
             "DASM_ARCHS=${dasm_archs}"

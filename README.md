@@ -46,14 +46,35 @@ Getting Started
 * [Report a bug](https://gitlab.com/OpenMW/openmw/issues) - read the [guidelines](https://wiki.openmw.org/index.php?title=Bug_Reporting_Guidelines) before submitting your first bug!
 * [Known issues](https://gitlab.com/OpenMW/openmw/issues?label_name%5B%5D=Bug)
 
+Building this layout on Linux
+-----------------------------
+
+Install GCC 16 with C++26 reflection support, CMake, Ninja, and Git. Configure
+Linux and cross-compile Windows in separate build directories:
+
+```sh
+cmake -S . -B out/build/linux/gcc16-debug -G Ninja -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B out/build/windows/gcc16-debug -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_BUILD_TYPE=Debug
+```
+
+The equivalent presets are `linux-gcc16-debug` and `windows-gcc16-debug`;
+both also have `-release` variants. Windows cross-compilation requires
+`x86_64-w64-mingw32-gcc`, `x86_64-w64-mingw32-g++`, and
+`x86_64-w64-mingw32-windres` in `/usr/bin`. CMake selects the `x64-linux`
+host triplet and either `x64-linux` or `x64-mingw-dynamic` for dependencies.
+The first configure downloads and builds missing vcpkg packages, which can take
+some time (including Qt and the OpenMW OpenSceneGraph fork). The Linux wizard's
+libunshield dependency is supplied by a project overlay. If the checkout
+has moved, run with `cmake --fresh` to discard paths cached at the old location.
+
 Building this layout on Windows
 -------------------------------
 
 The root CMake project configures the engine in `src/engine`, the game in
 `src/tes3`, and the launcher in `src/launcher`. The game and launcher currently
 build their existing implementations from `apps`. Engine headers retain their
-`components/...` include names through generated forwarding headers in the build
-directory. C++20 is the default; a newer standard can be selected with
+`components/...` include names through a generated include tree in the build
+directory. C++26 with reflection is the default; a newer standard can be selected with
 `CMAKE_CXX_STANDARD` when supported by the compiler.
 
 Install MSYS2's MinGW-w64 GCC 16 toolchain, CMake 3.21 or newer, Ninja, and Git.
@@ -72,7 +93,9 @@ used by OpenMW's dependency build. CMake generates vcpkg's required `vcpkg.json`
 filename in the build directory and restores dependencies before configuring
 the project. This includes Qt, SQLite, yaml-cpp, double-precision Bullet, and
 the OpenMW OpenSceneGraph and Recast forks. Overlay ports are in
-`out/vcpkg/ports`; installed packages are shared in `out/vcpkg/installed`.
+`out/cmake/vcpkg/ports`, with Windows-specific fixes in
+`out/cmake/vcpkg/windows-ports`; installed packages are kept in each build directory's
+`vcpkg_installed` directory so the target platforms remain separate.
 No separate Qt SDK is required. Enable existing test or benchmark targets with
 their `BUILD_*` options to restore the corresponding optional packages as well.
 
