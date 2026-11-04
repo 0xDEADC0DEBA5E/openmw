@@ -1,0 +1,5 @@
+Source: https://github.com/OpenMW/openmw-deps-build
+Commit: d7864263754c6d80293153fbf0ffcbd120511a28
+License: Apache-2.0 (see LICENSE-OpenMW).
+
+This port builds OpenMW's pinned OpenSceneGraph fork and required asset plugins.

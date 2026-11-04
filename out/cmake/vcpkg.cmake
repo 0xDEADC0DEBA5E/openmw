@@ -40,7 +40,7 @@ endif ()
 
 
 
-# Overlay ports include SQLite's MinGW Unicode entry-point fix and spirv-tools.
+# Project overlays include MinGW fixes and OpenMW's OSG fork.
 # spirv-tools forces a bare "-static" onto
 # every MinGW link (upstream CMakeLists.txt). That flag selects the *static*
 # libwinpthread, and mingw-w64 bundles that build it against UCRT while the gcc
@@ -49,7 +49,10 @@ endif ()
 # version as VCPKG_VERSION's baseline (1.4.341.0); re-seed it from
 # out/vcpkg/${PLATFORM}/buildtrees/versioning_/versions/spirv-tools/ if that
 # baseline moves, otherwise the overlay silently holds spirv-tools back.
-set(VCPKG_OVERLAY_PORTS "${OUT_PROJECT_DIR}/cmake/vcpkg/ports")
+list(PREPEND VCPKG_OVERLAY_PORTS "${OUT_PROJECT_DIR}/cmake/vcpkg/ports")
+list(REMOVE_DUPLICATES VCPKG_OVERLAY_PORTS)
+set(VCPKG_OVERLAY_PORTS "${VCPKG_OVERLAY_PORTS}" CACHE STRING
+    "Project and user vcpkg overlay ports" FORCE)
 
 set(DEP_FILE "${CMAKE_SOURCE_DIR}/dependencies.json")
 

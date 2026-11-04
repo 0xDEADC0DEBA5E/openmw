@@ -6,6 +6,9 @@
       "name": "windows-gcc16",
       "hidden": true,
       "generator": "Ninja",
+      "vendor": {
+        "jetbrains.com/clion": { "toolchain": "MinGW" }
+      },
       "environment": {
         "GCC16_BIN": "C:/msys64/mingw64/bin",
         "PATH": "$env{GCC16_BIN};$penv{PATH}"
@@ -16,6 +19,7 @@
         "CMAKE_RC_COMPILER": "$env{GCC16_BIN}/windres.exe",
         "CMAKE_MAKE_PROGRAM": "$env{GCC16_BIN}/ninja.exe",
         "OPENMW_USE_VCPKG": "ON",
+        "VCPKG_OVERLAY_PORTS": "${sourceDir}/out/cmake/vcpkg/ports",
         "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic",
         "VCPKG_HOST_TRIPLET": "x64-mingw-dynamic",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
