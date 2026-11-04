@@ -29,6 +29,9 @@
       "name": "windows-gcc16",
       "hidden": true,
       "generator": "Ninja",
+      "vendor": {
+        "jetbrains.com/clion": { "toolchain": "MinGW" }
+      },
       "environment": {
         "GCC16_BIN": "C:/msys64/mingw64/bin",
         "PATH": "$env{GCC16_BIN};$penv{PATH}"

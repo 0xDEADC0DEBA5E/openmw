@@ -5,7 +5,7 @@ vcpkg_from_github(
     SHA512 f81fcda206d9a7f602eb3a189369aa28ea4a1e2ad001dadc890c4e918f0db153626ed3e15c267007fabd16b6ccc234aa5b55376b40e65a98588a26f39dc9749a
     HEAD_REF main
     PATCHES
-        respect-build-examples.patch
+        honor-build-examples.patch
 )
 
 vcpkg_check_features(OUT_FEATURE_OPTIONS OPTIONS

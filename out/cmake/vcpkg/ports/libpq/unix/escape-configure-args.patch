@@ -1,0 +1,15 @@
+diff --git a/configure.ac b/configure.ac
+index 5cefa0d678..49bd0f2cc1 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -28,7 +28,9 @@ AC_COPYRIGHT([Copyright (c) 1996-2023, PostgreSQL Global Development Group])
+ AC_CONFIG_SRCDIR([src/backend/access/common/heaptuple.c])
+ AC_CONFIG_AUX_DIR(config)
+ AC_PREFIX_DEFAULT(/usr/local/pgsql)
+-AC_DEFINE_UNQUOTED(CONFIGURE_ARGS, ["$ac_configure_args"], [Saved arguments from configure])
++# Escape configure arguments before embedding them in a C string literal.
++pg_configure_args=$(printf '%s\n' "$ac_configure_args" | sed 's/\\/\\\\/g; s/"/\\"/g')
++AC_DEFINE_UNQUOTED(CONFIGURE_ARGS, ["$pg_configure_args"], [Saved arguments from configure])
+ 
+ [PG_MAJORVERSION=`expr "$PACKAGE_VERSION" : '\([0-9][0-9]*\)'`]
+ [PG_MINORVERSION=`expr "$PACKAGE_VERSION" : '.*\.\([0-9][0-9]*\)'`]

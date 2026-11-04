@@ -60,19 +60,6 @@ else()
         )
     endif()
 
-    set(linux_to_mingw_dynamic OFF)
-    if(VCPKG_CROSSCOMPILING AND VCPKG_TARGET_IS_MINGW AND VCPKG_HOST_IS_LINUX
-       AND VCPKG_TARGET_ARCHITECTURE STREQUAL "x64" AND VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
-        set(linux_to_mingw_dynamic ON)
-    endif()
-
-    # Linux buildvm binaries from the host port target Linux and cannot emit
-    # Windows PE objects. Build the generator locally with TARGET_SYS=Windows.
-    if(linux_to_mingw_dynamic)
-        find_program(LUAJIT_HOST_CC NAMES cc gcc REQUIRED)
-        list(APPEND options "HOST_CC=${LUAJIT_HOST_CC}")
-    endif()
-
     vcpkg_list(SET make_options "EXECUTABLE_SUFFIX=${VCPKG_TARGET_EXECUTABLE_SUFFIX}")
     set(strip_options "") # cf. src/Makefile
     if(VCPKG_TARGET_IS_OSX)
@@ -105,45 +92,29 @@ else()
         OPTIONS_RELEASE
             "DASM_ARCHS=${dasm_archs}"
     )
-    if(linux_to_mingw_dynamic)
-        # Upstream explicitly does not support Windows in its install Makefile.
-        vcpkg_build_make(
-            MAKEFILE "Makefile.vcpkg"
-            OPTIONS ${make_options}
-                "TARGET_AR=${VCPKG_DETECTED_CMAKE_AR} rcus"
-                "TARGET_STRIP=${VCPKG_DETECTED_CMAKE_STRIP}${strip_options}"
-        )
-        foreach(config IN ITEMS dbg rel)
-            if(config STREQUAL "dbg")
-                if(VCPKG_BUILD_TYPE)
-                    continue()
-                endif()
-                set(dest "${CURRENT_PACKAGES_DIR}/debug")
-            else()
-                set(dest "${CURRENT_PACKAGES_DIR}")
+    vcpkg_install_make(
+        MAKEFILE "Makefile.vcpkg"
+        OPTIONS
+            ${make_options}
+            "TARGET_AR=${VCPKG_DETECTED_CMAKE_AR} rcus"
+            "TARGET_STRIP=${VCPKG_DETECTED_CMAKE_STRIP}${strip_options}"
+    )
+
+    # The upstream install target only installs POSIX shared libraries.
+    if(VCPKG_TARGET_IS_MINGW AND VCPKG_LIBRARY_LINKAGE STREQUAL "dynamic")
+        foreach(config IN ITEMS rel dbg)
+            if(config STREQUAL "dbg" AND VCPKG_BUILD_TYPE)
+                continue()
             endif()
-            set(build_src "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${config}/src")
-            file(INSTALL "${build_src}/lua51.dll" DESTINATION "${dest}/bin")
-            file(INSTALL "${build_src}/libluajit-5.1.dll.a" DESTINATION "${dest}/lib")
-            file(INSTALL "${build_src}/luajit.exe" DESTINATION "${dest}/bin")
-            # Reuse the port's metadata, matching the MinGW import library name.
-            file(READ "${CMAKE_CURRENT_LIST_DIR}/luajit.pc" pkgconfig)
-            string(REPLACE "libname=lua\${abiver}" "libname=luajit-5.1" pkgconfig "${pkgconfig}")
-            file(WRITE "${dest}/lib/pkgconfig/luajit.pc" "${pkgconfig}")
+            set(package_prefix "${CURRENT_PACKAGES_DIR}")
+            if(config STREQUAL "dbg")
+                string(APPEND package_prefix "/debug")
+            endif()
+            file(INSTALL "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${config}/src/lua51.dll"
+                DESTINATION "${package_prefix}/bin")
+            file(INSTALL "${CURRENT_BUILDTREES_DIR}/${TARGET_TRIPLET}-${config}/src/libluajit-5.1.dll.a"
+                DESTINATION "${package_prefix}/lib")
         endforeach()
-        foreach(header IN ITEMS lua.h lualib.h lauxlib.h luaconf.h lua.hpp luajit.h)
-            file(INSTALL "${build_src}/${header}" DESTINATION "${CURRENT_PACKAGES_DIR}/include/luajit")
-        endforeach()
-        vcpkg_replace_string("${CURRENT_PACKAGES_DIR}/include/luajit/luaconf.h" "defined(LUA_BUILD_AS_DLL)" "1")
-        file(COPY "${build_src}/jit" DESTINATION "${CURRENT_PACKAGES_DIR}/tools/luajit/lua")
-    else()
-        vcpkg_install_make(
-            MAKEFILE "Makefile.vcpkg"
-            OPTIONS
-                ${make_options}
-                "TARGET_AR=${VCPKG_DETECTED_CMAKE_AR} rcus"
-                "TARGET_STRIP=${VCPKG_DETECTED_CMAKE_STRIP}${strip_options}"
-        )
     endif()
 endif()
 
